@@ -6,12 +6,18 @@ var ourCoords = {
     latitude: 47.624851,
     longitude: -122.52099
 };
+var prevCoords = null;
 
 window.onload = function() {
     if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            displayLocation,
+            displayError,
+            {enableHighAccuracy: true, timeout: 9000}
+        );
         var watchButton = document.getElementById("watch");
         watchButton.onclick = watchLocation;
-        var clearWatchButton = document.getElementById("clearWatch");
+        var clearWatchButton = document.getElementById("cleatWatch");
         clearWatchButton.onclick = clearWatch;
     }
     else {
@@ -24,7 +30,7 @@ function displayLocation(position) {
     var longitude = position.coords.longitude;
 
     var div = document.getElementById("location");
-    div.innerHTML = "You are at Latitude: " + latitude + ", Longitude: " + longitude;
+    div.innerHTML =  "You are at Latitude: " + latitude + ", Longitude: " + longitude;
     div.innerHTML += " (with " + position.coords.accuracy + " meters accuracy)";
 
     var km = computeDistance(position.coords, ourCoords);
@@ -33,6 +39,14 @@ function displayLocation(position) {
 
     if (map == null) {
         showMap(position.coords);
+        prevCoords = position.coords;
+    }
+    else {
+        var meters = computeDistance(position.coords, prevCoords) * 1000;
+        if (meters > 20) {
+            scrollMapToPosition(position.coords);
+            prevCoords = position.coords;
+        }
     }
 }
 
@@ -57,11 +71,10 @@ function degreesToRadians(degrees) {
 }
 
 //--
-//
 
 function showMap(coords) {
     var googleLatAndLong = new google.maps.LatLng(coords.latitude, coords.longitude);
-    
+
     var mapOptions = {
         zoom: 10,
         center: googleLatAndLong,
@@ -69,10 +82,13 @@ function showMap(coords) {
     };
     var mapDiv = document.getElementById("map");
     map = new google.maps.Map(mapDiv, mapOptions);
-    
+
     var title = "Your Location";
     var content = "You are here: " + coords.latitude + ", " + coords.longitude;
     addMarker(map, googleLatAndLong, title, content);
+
+    var wsLatLong = new google.maps.LatLng(ourCoords.latitude, ourCoords.longitude);
+    addMarker(map, wsLatLong, "WickedlySmart HQ latitude: " + ourCoords.latitude + ", longitude: " + ourCoords.longitude);
 }
 
 function addMarker(map, latlong, title, content) {
@@ -82,7 +98,7 @@ function addMarker(map, latlong, title, content) {
         title: title,
         clickable: true
     };
-    var marker =  new google.maps.Marker(markerOptions);
+    var marker = new google.maps.Marker(markerOptions);
     
     var infoWindowOptions = {
         content: content,
@@ -90,6 +106,7 @@ function addMarker(map, latlong, title, content) {
     };
     
     var infoWindow = new google.maps.InfoWindow(infoWindowOptions);
+    
     google.maps.event.addListener(marker, "click", function() {
         infoWindow.open(map);
     });
@@ -97,7 +114,7 @@ function addMarker(map, latlong, title, content) {
 
 function displayError(error) {
     var errorTypes = {
-        0: "Unknown error",
+        0: "Unknow error",
         1: "Permission denied",
         2: "Position is not available",
         3: "Request timeout"
@@ -110,15 +127,27 @@ function displayError(error) {
     div.innerHTML = errorMessage;
 }
 
-//--
-//
-
 function watchLocation() {
-    watchId = navigator.geolocation.watchPosition(displayLocation, displayError);
+    watchId = navigator.geolocation.watchPosition(
+                                    displayLocation,
+                                    displayError,
+                                    {enableHighAccuracy: true, timeout:3000}
+    );
 }
+
+function scrollMapToPosition(coords) {
+    var latitude = coords.latitude;
+    var longitude = coords.longitude;
+    
+    var latlong = new google.maps.LatLng(latitude, longitude);
+    map.panTo(latlong);
+    
+    addmarker(map, latlong, "Your new location", "You moved to: " + latitude + ", " + longitude);
+}
+
 function clearWatch() {
     if (watchId) {
-        navigator.geolocation.clearWatch(watchId);
+        navigator.geoloaction.clearWatch(watchId);
         watchId = null;
     }
 }
