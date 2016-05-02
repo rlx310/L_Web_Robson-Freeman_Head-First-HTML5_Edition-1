@@ -138,16 +138,16 @@ function watchLocation() {
 function scrollMapToPosition(coords) {
     var latitude = coords.latitude;
     var longitude = coords.longitude;
-    
+
     var latlong = new google.maps.LatLng(latitude, longitude);
     map.panTo(latlong);
     
-    addmarker(map, latlong, "Your new location", "You moved to: " + latitude + ", " + longitude);
+    addMarker(map, latlong, "Your new location", "You moved to: " + latitude + ", " + longitude);
 }
 
 function clearWatch() {
     if (watchId) {
-        navigator.geoloaction.clearWatch(watchId);
+        navigator.geolocation.clearWatch(watchId);
         watchId = null;
     }
 }
