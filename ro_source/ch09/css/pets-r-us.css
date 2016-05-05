@@ -1,0 +1,24 @@
+/* */
+
+body {
+    font-family: Helvetica, Verdana, sans-serif;
+    width: 60%;
+    margin: auto;
+}
+section {
+    clear: both;
+    padding-top: 20px;
+}
+section > header > h1 {
+    font-size: 110%;
+}
+section#about img {
+    width: 150px;
+    float: left;
+    margin-right: 20px;
+}
+section#directions img {
+    width: 150px;
+    float: right;
+    margin-left: 20px;
+}
